@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../model/config");
+const events = require("events");
+const mailer = require("nodemailer");
+const myEmitter = new events.EventEmitter();
 
 router.get("/", (req, res) => {
   db.query("SELECT * FROM user", (err, rows, fields) => {
@@ -13,7 +16,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.post("/add", (req, res) => {
+router.post("/add", (req, res, callback) => {
   try {
     let firstname = req.body.firstname;
     let lastname = req.body.lastname;
@@ -23,11 +26,17 @@ router.post("/add", (req, res) => {
       if (!err) {
         let query = "SELECT * FROM user";
         db.query(query, (err, rows, fields) => {
+          res.status(200);
           res.send(rows);
+          myEmitter.emit("sendMail", res);
         });
       } else {
         console.log(err);
       }
+    });
+
+    myEmitter.on("sendMail", data => {
+      console.log("myEmitter.data", data.statusCode);
     });
   } catch (error) {
     console.log(error);

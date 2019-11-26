@@ -26,5 +26,5 @@ app.use("/people", peopleRoutes);
 //   }
 //   res.json(data);
 // });
-
+console.log(process.argv);
 app.listen(3000);
